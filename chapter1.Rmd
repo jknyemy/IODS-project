@@ -1,9 +1,5 @@
 
-# About the project
----
-title: '**Introduction to open data science**'
-author: "J Kirjasniemi"
----
+# Introduction to open data science
 
 ## A short description
 
@@ -11,5 +7,3 @@ Introduction to open data science is a course about the tools, methods and best 
 
 https://jknyemy.github.io/IODS-project/
 
-
-I decided to basically just copy the text I put into the README file, since I managed to misunderstand the instructions and long story short, I'm now content that this file, the index.html file and the README file are all extant and contain what they're supposed to contain.

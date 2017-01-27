@@ -1,13 +1,4 @@
----
-title: '**Introduction to open data science**'
-author: "J Kirjasniemi"
----
 
-## A short description
+# About the project
 
-Introduction to open data science is a course about the tools, methods and best practices of scientific research and I suppose research in general using data science and open sources. I expect to practice my skill in R and get to know how to use Github and R Markdown, which seem like valuable tools for this purpose. 
-
-https://github.com/jknyemy/IODS-project  
-https://jknyemy.github.io/IODS-project/
-
-
+*Write a short description about the course and add a link to your github repository here. This is an R markdown (.Rmd) file so you can use R markdown syntax. See the 'Useful links' page in the mooc area (chapter 1) for instructions.*

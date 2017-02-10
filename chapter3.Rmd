@@ -1,0 +1,37 @@
+---
+title: "Chapter 3"
+author: "Janne Kirjasniemi"
+date: "10 helmikuuta 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Chapter three
+
+### Of student's and alcohol
+
+For the purposes of this analysis, I will be comparing the high use of alcohol with four other variables. High use of alcohol is binary variable, where the variable is true, if mean of the student's own estimate for their weekday and weekend alcohol use is over 2 on a scale of 1 to 5.
+
+First of all, the student's sex is worth looking at as an extra information:
+
+```{r}
+studen_alc <- read.csv2("C:/Users/Janne/Documents/GitHub/IODS-project/data/student_alc.csv")
+sukup <- table(studen_alc$sex, studen_alc$high_use)
+plot(sukup, main = ("Alcohol usage by sex"), col=c("darkblue", "red"))
+```
+
+Of this we can surmise, that while there is a higher incidence of high alcohol consumption among males, there is still ample use among the females, but only one in four females fall under high use, while in males this proportion is two out five.
+
+#### Free time and alcohol consumption
+
+The connecting substance of the chosen variables is that they describe the student's activities outside of studying, which one might assume is when most alcohol consumption takes place. On the other hand, lack of free time could drive a person towards stress induced intoxication as well. All in all, there were many variables to consider, for example travel time to school, but these four describe some basic components of free time.
+
+First of all romance. I chose this variable to find out, whether a romantic commitment lessens the occurence of high alcohol use.
+```{r}
+rom_alc <- table(studen_alc$high_use, studen_alc$romantic)
+barplot(rom_alc, col=c("darkblue", "red" ), legend = rownames(studen_alc$romantic), main=("Romantic ties and alcohol"))
+
+```

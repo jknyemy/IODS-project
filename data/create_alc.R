@@ -50,3 +50,4 @@ head(high_use)
 alc_1$high_use <- high_use
 # A final check
 glimpse(alc_1)
+write.csv2(alc_1, "student_alc")

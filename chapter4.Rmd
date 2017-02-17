@@ -1,0 +1,104 @@
+---
+title: "Chapter 4"
+author: "Janne Kirjasniemi"
+date: "17 helmikuuta 2017"
+output: html_document
+---
+
+```{r setup4, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Chapter 4
+
+## Housing values in the Suburbs of Boston
+
+The Boston dataset in the MASS package details the different conditions in 506 Boston suburbs through 14 variables ranging from per capita crime rate to access to highways and distance to employment centres and other variables relating to a suburbs attributes as a place to live. Here is a basic rundown of the general properties of the variables:
+
+```{r, message=FALSE}
+library(MASS)
+library(dplyr)
+library(ggplot2)
+library(corrplot)
+data("Boston")
+```
+
+```{r}
+summary(Boston)
+```
+It needs to be pointed out that chas is a binomial variable, telling whether the area in question is on the Charles River. Next, a correlation matrix of the variables, where blue indicates a positive and red a negative correlation between variables(where the depth of the colour and the size of the ball indicates the strength of the correlation):
+
+```{r}
+cor_matrix<-cor(Boston) %>% round(digits = 2)
+corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+
+```
+
+Here, for example we can see that there is some correlation between per capita crime rate(crim) and the ratio of non-retail businesses in a suburb(indus) and also with nitrogen oxide concentration levels in the air(nox). And a strong negative correlation between ages of the building(age) and distance to employment centres(dis), which would imply that the higher the age of the building, the nearer it is to employment. Also, there is a positive correlation between crime rate and age of the buidings. All of these are to be expected of a city that has grown outside from a city(or colonial town) centre, as Boston has.
+
+In the following are the boxplots of the variables, omitting the variable chas, which is a binomial variable. As can be seen from the summary numbers earlier, the different distributions of variables are in very different scales, so to allow comparison, the data has been scaled to the standard normal distribution:
+
+```{r}
+boston_scaled <- scale(Boston)
+boston_scaled <- as.data.frame(boston_scaled)
+bosvar1 <- c("indus", "lstat", "medv", "rad","crim", "dis")
+bosvar2 <- c("black", "tax", "age", "rm","ptratio", "zn", "nox")
+boston_m1 <- select(boston_scaled, one_of(bosvar1))
+boxplot(boston_m1)
+boston_m2 <- select(boston_scaled, one_of(bosvar2))
+boxplot(boston_m2)
+```
+
+As can be observed, the distributions are quite varied, with for example the proportion of african-american population being quite densely gathered above the mean, but having lots of outliers with smaller proportions, the same applying to zn, which is the proportion of large residential lots, where the mass of the distribution is gathered around the mean, with outliers having larger proportions. However, these outliers don't matter much, which can be seen for example that the variable black is still skewed above the mean.
+
+Here are the summaries of the scaled data:
+```{r}
+summary(boston_scaled)
+```
+```{r wrangling, message=FALSE}
+#Evolving the crim variable into a categorical variable by quantiles
+scaled_crim <- boston_scaled$crim
+bins <- quantile(scaled_crim)
+crime_cat <- cut(scaled_crim, breaks = bins, include.lowest = TRUE, label = c("low", "med_low", "med_high", "high"))
+boston_scaled$crim <- crime_cat
+#Producing a train set and a test set
+n <- nrow(Boston)
+ind <- sample(n,  size = n * 0.8)
+train <- boston_scaled[ind,]
+test <- boston_scaled[-ind,]
+#Saving the crim variable from test and then removing it from it.
+correct_classes <- test$crim
+test <- dplyr::select(test, -crim)
+```
+
+Using linear discriminant analysis on the scaled data with crime rate as a target variable against the other variables and making a biplot of the results gives us the following:
+```{r}
+#Fitting the linear discriminant analysis
+lda.fit <- lda(crim ~ ., data = train)
+#A function for arrows for the biplot
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "orange", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+#A numeric vector to paint the picture by
+classes <- as.numeric(train$crim)
+#The biplot with arrows included
+plot(lda.fit, dimen = 2, col = classes, pch=classes)
+lda.arrows(lda.fit, myscale = 2.75)
+```
+
+From the biplot we can see, that high crime rate is clustered separately from the rest, but the rest, while overlapping, are still clustered so that on can discern the classes from it.The arrows show the impact of different variables on the model. While the presence of pollution(nox) and the rate of large properties(zn) have some impact, curiously it seems that in the case of high crime rate, the accessibility to radial highways(rad) has a very strong impact. 
+
+Next we'll see, how the model handles predicting.
+
+```{r}
+#Prediction and a table of results
+lda.pred <- predict(lda.fit, newdata = test)
+table(correct = correct_classes, predicted = lda.pred$class)
+```
+
+As one can see, the predictions are very good when it comes to high crime rate, which was a very defined cluster on the biplot. Med high rate was quite cohesive as well and the prediction works somewhat well, giving the correct prediction 69% of the time. With both med_low and low, the predictions are 55% correct.
+

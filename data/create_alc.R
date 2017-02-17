@@ -51,3 +51,8 @@ alc_1$high_use <- high_use
 # A final check
 glimpse(alc_1)
 write.csv2(alc_1, "student_alc")
+
+sukup <- table(alc_1$sex, alc_1$high_use)
+prop.table(sukup)
+sukup
+

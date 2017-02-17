@@ -28,6 +28,7 @@ summary(Boston)
 It needs to be pointed out that chas is a binomial variable, telling whether the area in question is on the Charles River. Next, a correlation matrix of the variables, where blue indicates a positive and red a negative correlation between variables(where the depth of the colour and the size of the ball indicates the strength of the correlation):
 
 ```{r}
+#Making a correlation matrix of variables
 cor_matrix<-cor(Boston) %>% round(digits = 2)
 corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
 
@@ -38,8 +39,10 @@ Here, for example we can see that there is some correlation between per capita c
 In the following are the boxplots of the variables, omitting the variable chas, which is a binomial variable. As can be seen from the summary numbers earlier, the different distributions of variables are in very different scales, so to allow comparison, the data has been scaled to the standard normal distribution:
 
 ```{r}
+#Standardizing the Boston dataset
 boston_scaled <- scale(Boston)
 boston_scaled <- as.data.frame(boston_scaled)
+#Making the boxplots
 bosvar1 <- c("indus", "lstat", "medv", "rad","crim", "dis")
 bosvar2 <- c("black", "tax", "age", "rm","ptratio", "zn", "nox")
 boston_m1 <- select(boston_scaled, one_of(bosvar1))
@@ -87,7 +90,7 @@ lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "orange", tex 
 classes <- as.numeric(train$crim)
 #The biplot with arrows included
 plot(lda.fit, dimen = 2, col = classes, pch=classes)
-lda.arrows(lda.fit, myscale = 2.75)
+lda.arrows(lda.fit, myscale = 2)
 ```
 
 From the biplot we can see, that high crime rate is clustered separately from the rest, but the rest, while overlapping, are still clustered so that on can discern the classes from it.The arrows show the impact of different variables on the model. While the presence of pollution(nox) and the rate of large properties(zn) have some impact, curiously it seems that in the case of high crime rate, the accessibility to radial highways(rad) has a very strong impact. 
@@ -102,3 +105,31 @@ table(correct = correct_classes, predicted = lda.pred$class)
 
 As one can see, the predictions are very good when it comes to high crime rate, which was a very defined cluster on the biplot. Med high rate was quite cohesive as well and the prediction works somewhat well, giving the correct prediction 69% of the time. With both med_low and low, the predictions are 55% correct.
 
+Next we'll se what sort of clusters are to be found from the standardized Boston dataset:
+
+```{r, message=FALSE}
+#Getting the euclidean distance matrix from scaled standardized values so they are comparable
+data(Boston)
+boston_rescale <- scale(Boston)
+dist_bost <- dist(boston_rescale)
+#Finding the optimal number of clusters
+k_max <- 10
+twcss <- sapply(1:k_max, function(k){kmeans(dist_bost, k)$tot.withinss})
+plot(1:k_max, twcss, type='b')
+```
+
+As the function for within cluster sum of squares drops quite dramatically toeither two or four clusters, we will pick two, to see if there are some clear results. Next we will calculate the K-means, show a table of them and visualize the result:
+```{r}
+km <-kmeans(dist_bost, centers = 2)
+table(km$cluster)
+pairs(boston_rescale, col = km$cluster)
+```
+
+So, dividing the observations into two clusters seems to yield some results and it seems that the clearest cluster is the one holding the variables for crime rate and the rate of the african american population. With three clusters the result is similar:
+```{r}
+km <-kmeans(dist_bost, centers = 3)
+table(km$cluster)
+pairs(boston_rescale, col = km$cluster)
+```
+
+While the green cluster is somewhat mixed, the red cluster matches the black cluster from before. And the black cluster seems to hold the variables for rate of large sized lots and distance to employment centres which had a strong positive correlation. Interestingly, there was a medium sized negative correlation between crime rate and rate of african american population. The answer to this is not readily available from the work done now, but it is interesting.

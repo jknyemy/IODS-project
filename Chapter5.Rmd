@@ -1,0 +1,71 @@
+---
+title: "chapter5"
+author: "Janne Kirjasniemi"
+date: "24 helmikuuta 2017"
+output: html_document
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Chapter 5
+
+## Varieties of development in the world
+
+The following text analyses some variables taken from the UN Human Development Index. The eight variables chosen describe conditions relating to health, wealth, knowledge and the gender proportions in 155 countries of the world, where some countries are missing because of missing data from said countries. Here is a summary of the different variables:
+
+```{r, echo=FALSE}
+library(dplyr)
+library(GGally)
+library(MASS)
+library(corrplot)
+library(FactoMineR)
+```
+```{r}
+human <- read.table("C:/Users/Janne/Documents/GitHub/IODS-project/data/human.txt", sep  ="", header = T)
+summary(human)
+```
+Now, for example the variable Edu2.FM is the proportion of women having a secondary education divided by the proportion of men having the same. Labo.FM is the proportion of women in the labour force divided by the male proprtion. Interestingly the median values, which are perhaps more illuminating in this context, for the variables in question are quite high. The median of Edu2.FM is over 0.9. But the variance of the distribution is quite wide in these two variables, as it is in  all variables. Now, observing the overview of the dataset and correlations between variables:
+```{r}
+ggpairs(human)
+corrplot(cor(human), type="upper")
+
+```
+
+Both of these visualizations seem to indicate a negative correlation between gross national income(GNI) on the other hand and maternal mortality rate and adolescence birth rate on the other hand. And a strong negative correlation between the rate of female education and both maternal mortality rate and adolescence birth rate. Interestingly, the correlation visualization suggests a weak positive correlation between women's participation in the labour force and no correlation at all between GNI and labour participation. From the scatterplots of the variables one can see, that labour participation is much more evenly distributed and one could indiuce from this, that very bad conditions often force people to work for sustenance even in situations, where it can have negative effects in child mortality for example.
+
+Now a principal component analysis on the dataset, using singular value decomposition, with a biplot visualization of the results:
+
+```{r}
+
+pca_human <- prcomp(human)
+biplot(pca_human, choices = 1:2, cex = c(0.8, .8), col = c("grey40", "deeppink2"))
+pca_human
+```
+
+Now the visualization of the analysis reveals that un-scaled variables offer little explanation, and the arrows signifying the impact of the variable in question are clumped together except for the GNI variable, which we have seen had a strong impact from the correlation plot above. However, scaling the variables to the same standardized scale might reveal more:
+
+```{r}
+
+human_scaled <- scale(human)
+pca_human_scaled <- prcomp(human_scaled)
+biplot(pca_human_scaled, choices = 1:2, cex = c(0.8, .8), 
+       col = c("grey40", "deeppink2"))
+
+```
+
+Now this biplot seems to show more variation. The reason for this is, that when the variables were not scaled, many of them were not in comparable scales. For example, the ratios were mostly values between 0 and 1. The GNI in contrast varies from 581 to 123124, explaining its role in the unscaled analysis. So the variances are very different too. When the values are standardized, this problem is removed.
+
+The plot shows that most western countries, as well as the majority of Asian countries are clumped to gether in the centre and on the left. Circling the clump containing most of the countries are several Middle-Eastern countries as well as countries from Sub-Saharan Africa, with some others, such as Bolivia. The variables impacting the spread, signified by the arrows show that the majority cluster (to use such an expression) is defined by Life Expectancy, Education and Wealth, where as the variables drawing countries to the right of the plot are Maternal Mortality and Adolescent Birth Rate and the variables drawing countries to the upper part are the Ratio of Women in Parliament as well as the rate of women's participation in the labour force. The lower part of the plot, containing many countries, has no arrows pointing there.
+
+##Tea
+
+The tea dataset concerns the habits surrounding the consumption of tea, a popular beverage of Asian origin.
+```{R}
+data(tea)
+
+```
+
+
+

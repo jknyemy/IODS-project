@@ -15,12 +15,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The following text analyses some variables taken from the UN Human Development Index. The eight variables chosen describe conditions relating to health, wealth, knowledge and the gender proportions in 155 countries of the world, where some countries are missing because of missing data from said countries. Here is a summary of the different variables:
 
-```{r, echo=FALSE}
+```{r, echo = FALSE}
 library(dplyr)
 library(GGally)
 library(MASS)
 library(corrplot)
 library(FactoMineR)
+library(tidyr)
+library(ggplot2)
 ```
 ```{r}
 human <- read.table("C:/Users/Janne/Documents/GitHub/IODS-project/data/human.txt", sep  ="", header = T)
@@ -61,11 +63,27 @@ The plot shows that most western countries, as well as the majority of Asian cou
 
 ##Tea
 
-The tea dataset concerns the habits surrounding the consumption of tea, a popular beverage of Asian origin.
+The tea dataset concerns the habits surrounding the consumption of tea, a popular beverage of Asian origin. It contains answers from 300 interviewees on 36 variables relating to their relationship to tea and some variables containing background information. I have chosen six variables concerning basic preferences in consumption of tea. Here are some visualizations of the data:
+
 ```{R}
 data(tea)
+keep_columns <- c("Tea", "How", "how", "sugar", "where", "lunch")
+tea_time <- select(tea, one_of(keep_columns))
+gather(tea_time) %>% ggplot(aes(value), theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))) + facet_wrap("key", scales = "free") + geom_bar()
 
 ```
 
+Now a multivariate correspondence analysis of The variables of the dataset:
+
+```{r}
+
+mca <- MCA(tea_time, graph = FALSE)
+summary(mca)
+plot(mca, invisible=c("quali.sup"))
+plot(mca, invisible=c("ind"))
+
+```
+
+From this we can see, that the basic preferences between interviewees is clumped together quite closely, but when we observe the variables alone, we can see that such choices as whether Earl Grey -mix is used or whether one wants their tea black or sweet or lemony are the variables forming the cluster at the centre. Choices that can be seen as more sophisticated, such as the use of a tea shop and unpackaged tea are quite diffrentiated. This suggests that while the basic consumption patterns are factored closely together, the prefernce for example a tea shop and unpackaged tea are related.
 
 
